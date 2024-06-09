@@ -1,7 +1,5 @@
 package com.habanoz.duke.config;
 
-import com.habanoz.duke.graph.WebSearchNode;
-import com.habanoz.duke.tool.WebSearchRetriever;
 import org.springframework.ai.autoconfigure.ollama.OllamaChatProperties;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaApi;
@@ -37,10 +35,5 @@ public class BeanConfig {
     public OllamaChatModel deterministicModel() {
         OllamaApi ollamaApi = new OllamaApi(baseUrl);
         return new OllamaChatModel(ollamaApi, deterministicModelChatProperties().getOptions());
-    }
-
-    @Bean
-    public WebSearchRetriever webSearch() {
-        return new WebSearchRetriever();
     }
 }

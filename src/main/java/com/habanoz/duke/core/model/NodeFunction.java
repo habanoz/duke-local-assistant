@@ -1,6 +1,9 @@
 package com.habanoz.duke.core.model;
 
-import java.util.function.Function;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
-public interface NodeFunction extends Function<Dict, Dict> {
+import java.util.function.BiFunction;
+
+public interface NodeFunction extends BiFunction<Flux<NodeMessage>, Sinks.Many<Event>, Flux<NodeMessage>> {
 }

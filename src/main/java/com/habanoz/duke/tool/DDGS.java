@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +22,8 @@ public record DDGS(int k) {
     public List<SearchResult> search(String query) {
         Document doc;
         try {
-            doc = Jsoup.connect(DUCKDUCKGO_SEARCH_URL + query).get();
+            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            doc = Jsoup.connect(DUCKDUCKGO_SEARCH_URL + encodedQuery).get();
 
             ArrayList<Element> results = Optional.ofNullable(doc.getElementById("links"))
                     .map(s -> s.getElementsByClass("results_links"))

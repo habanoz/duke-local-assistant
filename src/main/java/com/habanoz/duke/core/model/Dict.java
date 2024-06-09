@@ -1,35 +1,16 @@
 package com.habanoz.duke.core.model;
 
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
-import java.util.*;
-
-public final class Dict {
-    private static final String KEY_SINGULAR = "$singular$";
-    private final boolean isSingleton;
-    private final HashMap<String, Object> map = new HashMap<>();
-
-    public Dict(boolean isSingleton) {
-        this.isSingleton = isSingleton;
-    }
-
-    public Dict() {
-        this(false);
-    }
-
-    public static Dict sin(Object value) {
-        Objects.requireNonNull(value, "Singleton value cannot be Null");
-
-        var dict = new Dict(true);
-        dict.map.put(KEY_SINGULAR, value);
-        return dict;
-    }
+public record Dict(Map<String, Object> map) implements NodeMessage {
 
     public static Dict map(Map<String, Object> map) {
         Objects.requireNonNull(map, "Map cannot be Null");
 
-        var dict = new Dict();
+        var dict = new Dict(new HashMap<>());
         dict.map.putAll(map);
 
         return dict;
@@ -51,59 +32,18 @@ public final class Dict {
     }
 
     public Dict extend(String key, Object value) {
-        Dict dict = new Dict();
+        Dict dict = new Dict(new HashMap<>());
         dict.map.putAll(map);
         dict.map.put(key, value);
         return dict;
-    }
-
-    public boolean isSingleton() {
-        return isSingleton;
-    }
-
-    public Set<Map.Entry<String, Object>> items() {
-        return map.entrySet();
-    }
-
-    public <T> T getVal() {
-        if (!isSingleton) throw new IllegalStateException("Dict is not singular!");
-        return (T) map.get(KEY_SINGULAR);
     }
 
     public <T> T getVal(String key) {
         return (T) map.get(key);
     }
 
-    public Integer getInt() {
-        return getVal();
-    }
-
-    public Prompt getPrompt() {
-        return getVal();
-    }
-
-    public ChatResponse getChatResponse() {
-        return getVal();
-    }
-
     public Map<String, Object> map() {
         return Collections.unmodifiableMap(map);
-    }
-
-    public Long getLong() {
-        return getVal();
-    }
-
-    public String str() {
-        return getVal();
-    }
-
-    public Float getFloat() {
-        return getVal();
-    }
-
-    public Double getDouble() {
-        return getVal();
     }
 
     public Integer getInt(String key) {
@@ -132,4 +72,5 @@ public final class Dict {
                 "map=" + map +
                 '}';
     }
+
 }

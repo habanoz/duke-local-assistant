@@ -12,33 +12,32 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
-public abstract class BaseNode {
+public class SimpleNodeCopy {
     protected final NodeFunction func;
 
-    private static class MergedNode extends BaseNode {
-        public MergedNode(NodeFunction func) {
-            super(func);
-        }
-
-        @Override
-        public Flux<NodeMessage> stream(Flux<NodeMessage> stream, Sinks.Many<Event> eventPublisher) {
-            return func.apply(stream, eventPublisher);
-        }
-    }
-
-
-    public BaseNode(NodeFunction func) {
+    public SimpleNodeCopy(NodeFunction func) {
         this.func = func;
     }
 
-    public BaseNode chain(BaseNode other) {
-        return new MergedNode((input, eventSink) -> {
+    public SimpleNodeCopy chain(SimpleNodeCopy other) {
+        return new SimpleNodeCopy((input, eventSink) -> {
             var interimResults = stream(input, eventSink);
             return other.stream(interimResults, eventSink);
         });
     }
 
-    public abstract Flux<NodeMessage> stream(Flux<NodeMessage> stream, Sinks.Many<Event> eventPublisher);
+    public Flux<NodeMessage> stream(Flux<NodeMessage> stream, Sinks.Many<Event> eventPublisher) {
+        stream = convertFlux(stream);
+
+        stream = stream.doOnNext(s -> {
+            Event event = getEvent(s);
+            if (event != null) {
+                eventPublisher.emitNext(event, Sinks.EmitFailureHandler.FAIL_FAST);
+            }
+        });
+
+        return func.apply(stream, eventPublisher);
+    }
 
 
     public Event getEvent(NodeMessage e) {
