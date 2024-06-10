@@ -36,9 +36,3 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/
-
-
-
-  threads:
-    virtual:
-      enabled: true

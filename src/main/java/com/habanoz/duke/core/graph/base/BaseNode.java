@@ -4,7 +4,6 @@ import com.habanoz.duke.core.model.*;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +20,7 @@ public abstract class BaseNode {
         }
 
         @Override
-        public Flux<NodeMessage> stream(Flux<NodeMessage> stream, Sinks.Many<Event> eventPublisher) {
+        public Flux<NodeMessage> stream(Flux<NodeMessage> stream, EventPublisher eventPublisher) {
             return func.apply(stream, eventPublisher);
         }
     }
@@ -38,7 +37,7 @@ public abstract class BaseNode {
         });
     }
 
-    public abstract Flux<NodeMessage> stream(Flux<NodeMessage> stream, Sinks.Many<Event> eventPublisher);
+    public abstract Flux<NodeMessage> stream(Flux<NodeMessage> stream, EventPublisher eventPublisher);
 
 
     public Event getEvent(NodeMessage e) {

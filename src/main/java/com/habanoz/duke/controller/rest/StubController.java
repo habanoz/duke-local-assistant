@@ -9,15 +9,6 @@ import java.util.UUID;
 @CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.HEAD, RequestMethod.DELETE, RequestMethod.OPTIONS, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.TRACE})
 @RestController
 public class StubController {
-    /**
-     * HTTP/2 200
-     * date: Fri, 07 Jun 2024 07:13:57 GMT
-     * server: Kestrel
-     * access-control-allow-origin: http://localhost:3000
-     * vary: Origin
-     * content-length: 0
-     * X-Firefox-Spdy: h2
-     */
     @GetMapping("maintenanceStatus")
     public String getMaintenanceStatus() {
         System.out.println("getMaintenanceStatus");

@@ -1,18 +1,17 @@
 package com.habanoz.duke.tool;
 
-import com.habanoz.duke.core.model.Event;
+import com.habanoz.duke.core.model.EventPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import reactor.core.publisher.Sinks;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public record WebSearchRetriever(Sinks.Many<Event> eventPublisher) implements VectorStore {
+public record WebSearchRetriever(EventPublisher eventPublisher) implements VectorStore {
     private static final Logger log = LoggerFactory.getLogger(WebSearchRetriever.class);
 
     @Override

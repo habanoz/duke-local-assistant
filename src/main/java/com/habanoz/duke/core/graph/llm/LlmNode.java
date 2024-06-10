@@ -14,14 +14,10 @@ public class LlmNode extends SimpleNode {
     private static NodeFunction callLlm(ChatModel chatModel) {
         return (input, eventSink) -> input.flatMap(d -> {
             if (d instanceof PromptMessage pm) {
-                // System.out.println("LlmNode: Prompt: >>>>>>>>>>>\n"+pm.prompt()+"\n<<<<<<<<<<<<<<<<<<<");
                 return chatModel.stream(pm.prompt());
             }
 
             throw new IllegalArgumentException("Only prompt message allowed");
-        }).map(ChatResponseStreamNodeMessage::new).map(s->{
-            // System.out.println("LlmNode: ChatResponse: "+s.chatResponse().getResult().getOutput().getContent());
-            return s;
-        });
+        }).map(ChatResponseStreamNodeMessage::new);
     }
 }

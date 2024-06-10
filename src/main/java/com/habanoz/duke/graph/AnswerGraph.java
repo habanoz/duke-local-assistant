@@ -1,14 +1,12 @@
 package com.habanoz.duke.graph;
 
+import com.habanoz.duke.core.graph.base.BaseNode;
 import com.habanoz.duke.core.graph.help.ActionNode;
 import com.habanoz.duke.core.graph.help.AssignNode;
-import com.habanoz.duke.core.graph.base.BaseNode;
 import com.habanoz.duke.core.graph.parser.StringOutParser;
 import com.habanoz.duke.core.graph.prompt.PromptTemplateNode;
-import com.habanoz.duke.core.model.ANodeMessage;
-import com.habanoz.duke.core.model.Dict;
-import com.habanoz.duke.core.model.Event;
-import com.habanoz.duke.core.model.NodeMessage;
+import com.habanoz.duke.core.model.*;
+import com.habanoz.duke.graph.utils.FormatUtils;
 import com.habanoz.duke.tool.WebSearchRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +15,11 @@ import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.ai.chat.prompt.AssistantPromptTemplate;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,41 +43,17 @@ public class AnswerGraph {
     @Autowired
     private StandaloneQueryPromptNode standaloneQueryPrompt;
 
-    private Dict formatDocs(Dict input) {
-        List<Document> docs = input.getVal("docs");
-        List<String> str_docs = new ArrayList<>();
-
-        for (int i = 0; i < docs.size(); i++) {
-            Document doc = docs.get(i);
-            str_docs.add("<doc id='%s'>%s</doc>".formatted(i + 1, doc.getContent()));
-        }
-        String formattedDocs = String.join("\n", str_docs);
-
-        return input.extend("context", formattedDocs);
-    }
-
-    private Dict formatChatHistory(Dict input) {
-        List<Message> chatHistory = input.getVal("chatHistory");
-        List<String> str_docs = new ArrayList<>();
-
-        for (Message doc : chatHistory) {
-            str_docs.add("- %s: %s".formatted(doc.getMessageType().name(), doc.getContent()));
-        }
-        String formattedDocs = String.join("\n", str_docs);
-
-        return input.extend("chatHistoryStr", formattedDocs);
-    }
 
     public String call(List<Message> messages) {
         String question = messages.getLast().getContent();
         List<Message> chatHistory = messages.subList(0, messages.size() - 1);
         Dict input = Dict.map("question", question, "chatHistory", chatHistory);
 
-        Sinks.Many<Event> eventPublisher = Sinks.many().unicast().onBackpressureError();
+        EventPublisher eventPublisher = new LoggingEventPublisher();
         return getGraph(messages, eventPublisher).stream(Flux.just(input), eventPublisher).map(d -> (ANodeMessage) d).blockFirst().str();
     }
 
-    public Flux<NodeMessage> stream(List<Message> messages, Sinks.Many<Event> eventPublisher) {
+    public Flux<NodeMessage> stream(List<Message> messages, EventPublisher eventPublisher) {
         String question = messages.getLast().getContent();
         List<Message> chatHistory = messages.subList(0, messages.size() - 1);
         Dict input = Dict.map("question", question, "chatHistory", chatHistory);
@@ -91,13 +63,13 @@ public class AnswerGraph {
         return getGraph(messages, eventPublisher).stream(Flux.just(input), eventPublisher);
     }
 
-    private BaseNode getGraph(List<Message> messages, Sinks.Many<Event> eventPublisher) {
+    private BaseNode getGraph(List<Message> messages, EventPublisher eventPublisher) {
         StringOutParser strParser = new StringOutParser();
 
-        BaseNode standaloneQueryGraph = new ActionNode(this::formatChatHistory).chain(standaloneQueryPrompt).chain(deterministicLlm).chain(strParser);
+        BaseNode standaloneQueryGraph = new ActionNode(FormatUtils::formatChatHistory).chain(standaloneQueryPrompt).chain(deterministicLlm).chain(strParser);
         BaseNode searchGraph = searchQueryPrompt.chain(deterministicLlm).chain(strParser).chain(new WebSearchNode(new WebSearchRetriever(eventPublisher)));
 
-        BaseNode graph = new AssignNode("standaloneQuery", standaloneQueryGraph).chain(new AssignNode("docs", searchGraph)).chain(new ActionNode(this::formatDocs));
+        BaseNode graph = new AssignNode("standaloneQuery", standaloneQueryGraph).chain(new AssignNode("docs", searchGraph)).chain(new ActionNode(FormatUtils::formatDocs));
 
         PromptTemplateNode answerPrompt = getAnswerPrompt(messages);
 

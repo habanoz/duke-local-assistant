@@ -3,7 +3,6 @@ package com.habanoz.duke.graph;
 import com.habanoz.duke.core.graph.prompt.PromptTemplateNode;
 import com.habanoz.duke.core.model.Event;
 import com.habanoz.duke.core.model.NodeMessage;
-import com.habanoz.duke.core.model.StringMessage;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
