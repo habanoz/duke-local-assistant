@@ -22,7 +22,7 @@ Make sure application.yml file contains correct configuration for your ollama in
 
 ### UI
 
-UI is a React application. I copied Microsoft Chat Copilot application and modified its UI.  
+UI is a React application. I modified and simplified Microsoft Chat Copilot UI application.  
 
 ![ui](assets/ui.png)
 
