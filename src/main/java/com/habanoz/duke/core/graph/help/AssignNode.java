@@ -22,9 +22,7 @@ public class AssignNode extends SimpleNode {
     private static NodeFunction func(String name, BaseNode node) {
         return (input, eventSink) -> {
             Mono<Dict> monoDict = input.next().cast(Dict.class);
-            Dict dict = monoDict.blockOptional().orElseThrow(() -> new IllegalArgumentException("Unable to obtain the dict"));
-
-            Flux<NodeMessage> resultFlux = node.stream(Flux.just(dict), eventSink);
+            Flux<NodeMessage> resultFlux = node.stream(monoDict.flux().cast(NodeMessage.class), eventSink);
 
             return resultFlux.reduce((d1, d2) -> {
                         if (d1 instanceof TextStreamNodeMessage tsn1 && d2 instanceof TextStreamNodeMessage tsn2) {
@@ -42,8 +40,7 @@ public class AssignNode extends SimpleNode {
 
                         throw new IllegalArgumentException("Expected TextStreamNodeMessage or A single ANodeMessage. " +
                                 "For name:" + name + " got:" + m.getClass().getSimpleName());
-                    }).map(s -> dict.extend(name, s.getVal())).flux()
-                    .cast(NodeMessage.class);
+                    }).flatMap(s -> monoDict.map(dict -> dict.extend(name, s.getVal()))).cast(NodeMessage.class).flux();
         };
     }
 

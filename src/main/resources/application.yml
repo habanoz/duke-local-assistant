@@ -6,6 +6,8 @@ spring:
     driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
 
   ai:
     ollama:
@@ -22,7 +24,9 @@ spring:
           options:
             model: llama3
             temperature: 0.0
-
+    embedding:
+      options:
+        model: nomic-embed-text
   mvc:
     static-path-pattern: /static/**
     cors:

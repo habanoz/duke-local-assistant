@@ -58,8 +58,6 @@ public class AnswerGraph {
         List<Message> chatHistory = messages.subList(0, messages.size() - 1);
         Dict input = Dict.map("question", question, "chatHistory", chatHistory);
 
-        log.info("Building Graph!");
-
         return getGraph(messages, eventPublisher).stream(Flux.just(input), eventPublisher);
     }
 
