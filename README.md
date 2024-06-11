@@ -1,4 +1,3 @@
-+
 # Duke Java AI Assistant
 
 ![Duke](assets/duke.png)
